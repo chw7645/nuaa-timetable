@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">南航课程表</string>
+    <string name="widget_name">课程表</string>
+    <string name="widget_description">显示今天的课程、节次、地点与时间</string>
+    <string name="widget_empty">今天没有课程安排</string>
+    <string name="widget_no_data">打开应用登录后同步</string>
+</resources>

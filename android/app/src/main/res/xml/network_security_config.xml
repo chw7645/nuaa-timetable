@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 与原 APK 一致的网络策略：仅对南航域名放开明文 HTTP（教务系统为 http）。 -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">nuaa.edu.cn</domain>
+    </domain-config>
+</network-security-config>

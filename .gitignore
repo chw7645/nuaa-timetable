@@ -1,0 +1,66 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Widget Preview related
+.widget_preview/
+
+# 本工程：工具链、构建产物与本地制品不入库
+.toolchain/
+build/
+.dart_tool/
+android/.gradle/
+android/local.properties
+dist/
+*.jks
+*.keystore
+
+# 逆向取证材料与本地素材一律不入库：
+# - original/  为原始客户端安装包（第三方著作权）
+# - analysis/  为原站前端脚本与抓包探针（第三方代码 / 可能含会话痕迹）
+# - reference/ 为原版界面截图
+# - visual/    为本机渲染快照，成品见 docs/screenshots/
+artifacts/
+

@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '要发布的 tag，例如 v1.10.0（需与 pubspec 版本一致）'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: build APK & publish release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android licenses
+        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.8'
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
+
+      # 单 ABI 包：绝大多数机型，体积约 22 MB。
+      # 注意不能用 --split-per-abi：AGP 9 + Flutter 3.47 下其 arm64 产物会缺失
+      # AndroidManifest.xml 与 resources.arsc，装不上。
+      - name: Build arm64 APK
+        run: |
+          flutter build apk --release --target-platform android-arm64
+          mv build/app/outputs/flutter-apk/app-release.apk nuaa_timetable-arm64.apk
+
+      - name: Build universal APK
+        run: |
+          flutter build apk --release
+          mv build/app/outputs/flutter-apk/app-release.apk nuaa_timetable-universal.apk
+
+      - name: Verify APK integrity
+        run: |
+          for f in nuaa_timetable-arm64.apk nuaa_timetable-universal.apk; do
+            n=$(unzip -l "$f" | grep -cE "AndroidManifest.xml|resources.arsc")
+            echo "$f manifest+arsc=$n"
+            test "$n" -eq 2 || exit 1
+          done
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: ${{ github.event.inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          body: |
+            南航课程表 ${{ github.event.inputs.tag || github.ref_name }}
+
+            - `nuaa_timetable-arm64.apk`：单 ABI，约 22 MB，绝大多数机型适用
+            - `nuaa_timetable-universal.apk`：含全部 ABI，约 56 MB
+
+            > 非官方客户端，仅供学习交流。安装前请先卸载旧版（签名不同），
+            > 卸载会清除本机保存的学号、密码与课表缓存。
+          files: |
+            nuaa_timetable-arm64.apk
+            nuaa_timetable-universal.apk

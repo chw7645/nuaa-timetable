@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 深色模式：与 App 内 AppSemanticColors.dark 对齐 -->
+<resources>
+    <color name="widget_outer_start">#FF12171C</color>
+    <color name="widget_outer_end">#FF1B232B</color>
+    <color name="widget_card_bg">#FF1C2027</color>
+    <color name="widget_header_bg">#FF23272E</color>
+    <color name="widget_text_primary">#FFECEDEF</color>
+    <color name="widget_text_secondary">#FF9AA0A6</color>
+    <color name="widget_accent">#FF7FB2FF</color>
+</resources>
