@@ -25,14 +25,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # ubuntu-latest 镜像已预装 Android SDK，无需再引入 setup-android
-      # （该 action 在本仓库首次运行时于此步失败）。这里只做环境探测，
-      # 缺失的 platform / build-tools 由 Gradle 按需自动下载。
-      - name: Check Android SDK
+      # ubuntu-latest 已预装 Android SDK，但**不保证**有本项目所需的
+      # platform 36 / build-tools 36.0.0 / NDK（flutter.ndkVersion）。
+      # 缺组件时 Gradle 会尝试自动下载，而 GitHub runner 默认未接受 license，
+      # 于是构建以 exit code 1 结束且看不到原因。这里显式安装并接受 license。
+      - name: Install Android SDK components
         run: |
-          echo "ANDROID_HOME=${ANDROID_HOME:-<unset>}"
-          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-<unset>}"
-          ls "${ANDROID_HOME:-/usr/local/lib/android/sdk}" 2>/dev/null | head -20 || true
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKM="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          echo "SDK=$SDK"
+          yes | "$SDKM" --licenses > /dev/null 2>&1 || true
+          "$SDKM" --install "platform-tools" "platforms;android-36" \
+            "build-tools;36.0.0" "ndk;28.2.13676358" 2>&1 | tail -6
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -52,12 +56,26 @@ jobs:
       # AndroidManifest.xml 与 resources.arsc，装不上。
       - name: Build arm64 APK
         run: |
-          flutter build apk --release --target-platform android-arm64
+          set -o pipefail
+          if ! flutter build apk --release --target-platform android-arm64 2>&1 | tee /tmp/build.log; then
+            # 把关键错误写进 annotation，否则 Actions 页面只有一个 exit code 1，
+            # 而 job 日志需要仓库管理员权限才能下载。
+            MSG=$(grep -iE "error:|FAILURE:|What went wrong|Caused by|Execution failed" /tmp/build.log \
+                  | head -8 | tr '\n' ' ' | cut -c1-900)
+            echo "::error title=arm64 build failed::${MSG}"
+            exit 1
+          fi
           mv build/app/outputs/flutter-apk/app-release.apk nuaa_timetable-arm64.apk
 
       - name: Build universal APK
         run: |
-          flutter build apk --release
+          set -o pipefail
+          if ! flutter build apk --release 2>&1 | tee /tmp/build2.log; then
+            MSG=$(grep -iE "error:|FAILURE:|What went wrong|Caused by|Execution failed" /tmp/build2.log \
+                  | head -8 | tr '\n' ' ' | cut -c1-900)
+            echo "::error title=universal build failed::${MSG}"
+            exit 1
+          fi
           mv build/app/outputs/flutter-apk/app-release.apk nuaa_timetable-universal.apk
 
       - name: Verify APK integrity
