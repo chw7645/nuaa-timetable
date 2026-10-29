@@ -165,14 +165,6 @@ docs/                                     逆向分析、深色修复、小组�
 | [`CHANGELOG.md`](CHANGELOG.md) | 版本变更记录 |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | 贡献指南与代码约定 |
 
-## 已知限制
-
-- 未在真机长期运行验证。界面与业务逻辑由 91 项测试覆盖，但通知权限、小组件实际摆放、
-  深色桌面刷新等设备相关行为仍需人工验收。
-- 验证码场景（`checkNeedCaptcha.htl`）未做自动绕过，命中时提示先在浏览器登录一次。
-- 学期第 1 周日期仅 2026-2027 秋季（`semester.id = 402`）经数据反证，其余按规则推断，
-  UI 上标注来源。
-- 凭据以明文保存在本机 SharedPreferences；如需加固可接入 Keystore 封装。
 
 ## 许可
 
