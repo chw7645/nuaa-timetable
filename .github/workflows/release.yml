@@ -60,8 +60,9 @@ jobs:
           if ! flutter build apk --release --target-platform android-arm64 2>&1 | tee /tmp/build.log; then
             # 把关键错误写进 annotation，否则 Actions 页面只有一个 exit code 1，
             # 而 job 日志需要仓库管理员权限才能下载。
-            MSG=$(grep -iE "error:|FAILURE:|What went wrong|Caused by|Execution failed" /tmp/build.log \
-                  | head -8 | tr '\n' ' ' | cut -c1-900)
+            MSG=$(grep -A 8 -iE "What went wrong|FAILURE:" /tmp/build.log | head -30 \
+                  | tr '\n' ' ' | cut -c1-1400)
+            [ -z "$MSG" ] && MSG=$(tail -30 /tmp/build.log | tr '\n' ' ' | cut -c1-1400)
             echo "::error title=arm64 build failed::${MSG}"
             exit 1
           fi
@@ -71,8 +72,9 @@ jobs:
         run: |
           set -o pipefail
           if ! flutter build apk --release 2>&1 | tee /tmp/build2.log; then
-            MSG=$(grep -iE "error:|FAILURE:|What went wrong|Caused by|Execution failed" /tmp/build2.log \
-                  | head -8 | tr '\n' ' ' | cut -c1-900)
+            MSG=$(grep -A 8 -iE "What went wrong|FAILURE:" /tmp/build2.log | head -30 \
+                  | tr '\n' ' ' | cut -c1-1400)
+            [ -z "$MSG" ] && MSG=$(tail -30 /tmp/build2.log | tr '\n' ' ' | cut -c1-1400)
             echo "::error title=universal build failed::${MSG}"
             exit 1
           fi
