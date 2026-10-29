@@ -25,11 +25,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
+      # ubuntu-latest 镜像已预装 Android SDK，无需再引入 setup-android
+      # （该 action 在本仓库首次运行时于此步失败）。这里只做环境探测，
+      # 缺失的 platform / build-tools 由 Gradle 按需自动下载。
+      - name: Check Android SDK
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-<unset>}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-<unset>}"
+          ls "${ANDROID_HOME:-/usr/local/lib/android/sdk}" 2>/dev/null | head -20 || true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
