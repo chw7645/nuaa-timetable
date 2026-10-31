@@ -64,3 +64,6 @@ dist/
 # - visual/    为本机渲染快照，成品见 docs/screenshots/
 artifacts/
 
+# golden 测试失败时由 flutter_test 生成（masterImage/testImage/diff），
+# 是构建产物且会包含渲染数据，不应入库。
+test/failures/
